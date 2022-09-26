@@ -13,6 +13,9 @@
       <module name="Coffee_Machine.Topics-Constructor-Theory.main" target="11" />
       <module name="Coffee_Machine.Topics-Enums_in_Java-Hidden_enumeration.main" target="11" />
       <module name="Coffee_Machine.Topics-Enums_in_Java-Theory.main" target="11" />
+      <module name="Coffee_Machine.Topics-Fields_and_methods_in_enum-Danger_levels.main" target="11" />
+      <module name="Coffee_Machine.Topics-Fields_and_methods_in_enum-Robot_control.main" target="11" />
+      <module name="Coffee_Machine.Topics-Fields_and_methods_in_enum-Theory.main" target="11" />
       <module name="Coffee_Machine.Topics-Functional_decomposition-Calculator_with_four_methods.main" target="11" />
       <module name="Coffee_Machine.Topics-Functional_decomposition-Create_a_full_name.main" target="11" />
       <module name="Coffee_Machine.Topics-Functional_decomposition-Decompose_a_math_function.main" target="11" />

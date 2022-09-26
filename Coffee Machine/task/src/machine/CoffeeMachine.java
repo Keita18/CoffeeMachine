@@ -1,18 +1,20 @@
 package machine;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Scanner;
 
 public class CoffeeMachine {
-    private static final int[] state = new int[]{400, 540, 120, 9, 550};
-    private static DataState machineState;
+    private static DataState coffeeMachineState;
     private static String currentState = "initial";
     private static int stateProcess;
+    private static DataState espresso;
+    private static DataState latte;
+    private static DataState cappuccino;
 
     public CoffeeMachine() {
-        machineState = new DataState(400, 540, 120, 9, 550);
+        coffeeMachineState = new DataState(400, 540, 120, 9, 550);
+        espresso = new DataState(250, 0, 16, 1, 4);
+        latte = new DataState(350, 75, 20, 1, 7);
+        cappuccino = new DataState(200, 100, 12, 1, 6);
         start();
     }
 
@@ -25,121 +27,138 @@ public class CoffeeMachine {
     }
 
     void process(String action) {
-        if (currentState.equals("initial")) {
-            switch (action) {
-                case "buy":
+        switch (currentState) {
+            case "initial":
+                switch (action) {
+                    case "buy":
+                        currentState = action;
+                        tab();
+                        System.out.println("What do you want to buy? 1 - espresso, " +
+                                "2 - latte, 3 - cappuccino, back - to main menu:");
 
-                    break;
-                case "fill":
-                    currentState = action;
+                        break;
+                    case "fill":
+                        currentState = action;
+                        stateProcess = 0;
+                        tab();
+                        System.out.println("Write how many ml of water you want to add:");
+                        break;
+                    case "take":
+                        tab();
+                        take();
+                        tab();
+                        start();
+                        break;
+                    case "remaining":
+                        tab();
+                        remaining();
+                        tab();
+                        start();
+                        break;
+                    case "exit":
+                        System.exit(1);
+                        break;
+                }
+                break;
+            case "fill":
+                fill(action, stateProcess);
+                stateProcess++;
+                if (stateProcess == 4) {
+                    currentState = "initial";
                     stateProcess = 0;
                     tab();
-                    fill("0", 5);
-                    break;
-                case "take":
-                    tab();
-                    take();
-                    tab();
                     start();
-                    break;
-                case "remaining":
-                    tab();
-                    remaining();
-                    tab();
-                    start();
-                    break;
-                case "exit":
-                    System.exit(1);
-                    break;
-            }
-        } else if (currentState.equals("fill")) {
-            fill(action, stateProcess);
-            stateProcess++;
-            if (stateProcess == 4) {
+                }
+                break;
+            case "buy":
+                switch (action) {
+                    case "1":
+                        buy(espresso);
+                        break;
+                    case "2":
+                        buy(latte);
+                        break;
+                    case "3":
+                        buy(cappuccino);
+                        break;
+                    case "back":
+                        break;
+                }
                 currentState = "initial";
-                stateProcess = 0;
                 tab();
                 start();
-            }
+                break;
+        }
+    }
+
+    private void buy(DataState supply) {
+        if (coffeeMachineState.water < supply.water) {
+            System.out.println("Sorry, not enough water");
+        } else if (coffeeMachineState.milk < supply.milk) {
+            System.out.println("Sorry, not enough milk");
+        } else if (coffeeMachineState.coffeeBeans < supply.coffeeBeans) {
+            System.out.println("Sorry, not enough coffee beans");
+        } else if (coffeeMachineState.cups < supply.cups) {
+            System.out.println("Sorry, not enough cups");
+        } else {
+            coffeeMachineState.water -= supply.water;
+            coffeeMachineState.milk -= supply.milk;
+            coffeeMachineState.coffeeBeans -= supply.coffeeBeans;
+            coffeeMachineState.cups -= supply.cups;
+            coffeeMachineState.money += supply.money;
+            System.out.println("I have enough resources, making you a coffee!");
         }
     }
 
     private void fill(String action, int stateProcess) {
-        var quantity = 0;
-        try {
-            quantity = Integer.parseInt(action);
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Filling process accept only integer");
-        }
+        var quantity = toInt(action);
+
         switch (stateProcess) {
             case 0:
-                machineState.water += quantity;
-                state[stateProcess] += quantity;
+                coffeeMachineState.water += quantity;
                 System.out.println("Write how many ml of milk you want to add:");
                 break;
             case 1:
-                machineState.milk += quantity;
-                state[stateProcess] += quantity;
+                coffeeMachineState.milk += quantity;
                 System.out.println("Write how many grams of coffee beans you want to add:");
                 break;
             case 2:
-                machineState.coffeeBeans += quantity;
-                state[stateProcess] += quantity;
+                coffeeMachineState.coffeeBeans += quantity;
                 System.out.println("Write how many disposable cups you want to add:");
                 break;
             case 3:
-                machineState.cups += quantity;
-                state[stateProcess] += quantity;
+                coffeeMachineState.cups += quantity;
                 break;
             default:
-                System.out.println("Write how many ml of water you want to add:");
-                break;
         }
     }
 
     private void take() {
-        System.out.println("I gave you $" + CoffeeMachine.state[4]);
-        System.out.println("MS--- I gave you $" + machineState.money);
-        machineState.money = 0;
-        CoffeeMachine.state[4] = 0;
+        System.out.println("I gave you $" + coffeeMachineState.money);
+        coffeeMachineState.money = 0;
     }
 
     private void remaining() {
         System.out.println("The coffee machine has:");
         System.out.println(
-                CoffeeMachine.state[0] + " ml of water\n"
-                        + CoffeeMachine.state[1] + " ml of milk\n"
-                        + CoffeeMachine.state[2] + " g of coffee beans\n"
-                        + CoffeeMachine.state[3] + " disposable cups\n$"
-                        + CoffeeMachine.state[4] + " of money");
-
-        System.out.println(
-                machineState.water + " ml of water\n"
-                        + machineState.milk + " ml of milk\n"
-                        + machineState.coffeeBeans + " g of coffee beans\n"
-                        + machineState.cups + " disposable cups\n$"
-                        + machineState.money + " of money");
+                coffeeMachineState.water + " ml of water\n"
+                        + coffeeMachineState.milk + " ml of milk\n"
+                        + coffeeMachineState.coffeeBeans + " g of coffee beans\n"
+                        + coffeeMachineState.cups + " disposable cups\n$"
+                        + coffeeMachineState.money + " of money");
     }
 
-/*    private void printMissingR(int supply, boolean miss) {
-        String[] supplies = {"water", "milk", "coffee beans", "cups"};
-        if (miss) {
-            System.out.println("Sorry, not enough " + supplies[supply] + "!\n");
-
-        } else System.out.println("I have enough resources, making you a coffee!\n");
-    }*/
-
-    /*
-        private Map<String, Integer> initResources(int water, int milk, int coffeeBeans, int cups, int money) {
-            Map<String, Integer> resources = new HashMap<>();
-            resources.put("water", water);
-            resources.put("milk", milk);
-            resources.put("coffee beans", coffeeBeans);
-            resources.put("cups", cups);
-            resources.put("money", money);
-            return resources;
+    private int toInt(String value) {
+        var toInt = 0;
+        try {
+            toInt = Integer.parseInt(value);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Filling process accept only integer");
         }
-    */
+
+        return toInt;
+    }
+
     private static class DataState {
         int water;
         int milk;
@@ -155,51 +174,47 @@ public class CoffeeMachine {
             this.money = money;
         }
     }
+
+//    public static void main(String[] args) {
+//        Scanner scanner = new Scanner(System.in);
+//        CoffeeMachine coffeeMachine = new CoffeeMachine();
+//        while (true) {
+//            var execute = scanner.next();
+//            coffeeMachine.process(execute);
+//        }
+//    }
 }
 
 class Main {
+
+    public static enum ChargeLevel {
+
+        FULL(4, "green"),
+        HIGH(3, "green"),
+        MEDIUM(2, "yellow"),
+        LOW(1, "red");
+
+        int sections;
+        String color;
+
+        ChargeLevel(int sections, String color) {
+            this.sections = sections;
+            this.color = color;
+        }
+
+        public int getSections() {
+            return sections;
+        }
+
+        public String getColor() {
+            return color;
+        }
+    }
+
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        CoffeeMachine coffeeMachine = new CoffeeMachine();
-        while (true) {
-            var execute = scanner.next();
-            coffeeMachine.process(execute);
-        }
-
+        ChargeLevel.LOW.color = "Yellow";
+        System.out.println(ChargeLevel.LOW.color); // red
+        System.out.println(ChargeLevel.LOW.getColor()); // red
     }
-
-    /**/
-
-    /*    private void run() {
-        int[] state = new int[]{400, 540, 120, 9, 550};
-
-        Scanner scanner = new Scanner(System.in);
-
-        boolean exit = false;
-        while (!exit) {
-            System.out.println("Write action (buy, fill, take, remaining, exit):");
-            String action = scanner.next();
-            switch (action) {
-                case "buy":
-                    int cup = state[3] - 1;
-                    if (cup > 0) {
-                        buy(state, scanner);
-                    } else printMissingR(3, true);
-                    break;
-                case "fill":
-                    fill(state, scanner);
-                    break;
-                case "take":
-                    take(state);
-                    break;
-                case "remaining":
-                    printState(state);
-                    break;
-                case "exit":
-                    exit = true;
-                    break;
-            }
-        }
-    }
-*/
 }
+
